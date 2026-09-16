@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance Success{% endblock %}
+
+{% block content %}
+<!-- Popup container -->
+<div id="popup" class="popup">
+    <span class="close" onclick="closePopup()">&times;</span>
+    <h1>Attendance has been recorded successfully.</h1>
+    <a href="{% url 'attendance_report' %}">View Attendance Report</a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Style for the popup container */
+    .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 1px solid #ccc;
+        padding: 20px;
+        background-color: #fff;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        text-align: center;
+    }
+    /* Style for the close button */
+    .close {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        cursor: pointer;
+        font-size: 20px;
+        color: #aaa;
+    }
+    .close:hover {
+        color: #000;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- JavaScript to close the popup after 5 seconds -->
+<script>
+    // Function to close the popup
+    function closePopup() {
+        var popup = document.getElementById('popup');
+        popup.style.display = 'none';
+    }
+
+    // Set timer to close the popup after 5 seconds
+    setTimeout(closePopup, 5000);
+</script>
+{% endblock %}

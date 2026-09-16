@@ -1,0 +1,7 @@
+Django==4.2.1
+psycopg2-binary==2.9.6
+django-humanize==0.1.2
+humanize==4.9.0
+python-decouple
+django-cors-headers
+django-filter

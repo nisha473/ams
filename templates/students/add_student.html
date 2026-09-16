@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Student</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            margin-top: 50px;
+        }
+        .form-header {
+            margin-bottom: 30px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        form label {
+            margin-bottom: 0.5rem;
+        }
+        form input[type="text"],
+        form input[type="email"],
+        form input[type="date"] {
+            margin-bottom: 1rem;
+        }
+        .csv-preview {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+   <!-- Navigation Bar -->
+   <nav class="navbar navbar-expand-lg navbar-light">
+    <a class="navbar-brand" href="{% url 'home_page' %}">NCMT Attendance Management System</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <span class="navbar-text">
+                    <i class="fas fa-bell notification-icon"></i> <!-- Notification Icon -->
+                    <strong>{{ user.username }}</strong> <!-- Display username here -->
+                </span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'logout' %}"><strong>Logout</strong></a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+    <div class="container form-container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="accordion">
+                            <div class="card">
+                                <div class="card-header" id="formHeading">
+                                    <h5 class="mb-0">
+                                        <button class="btn btn-link" data-toggle="collapse" data-target="#formSection" aria-expanded="true" aria-controls="formSection">
+                                            Add Student Form
+                                        </button>
+                                    </h5>
+                                </div>
+                                <div id="formSection" class="collapse show" aria-labelledby="formHeading" data-parent="#accordion">
+                                    <div class="card-body">
+                                        <h1 class="form-header text-center">Add Student</h1>
+                                        <form method="post" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            <div class="form-group">
+                                                {{ form.name.label_tag }}
+                                                {{ form.name }}
+                                            </div>
+                                            <div class="form-group">
+                                                {{ form.roll_number.label_tag }}
+                                                {{ form.roll_number }}
+                                            </div>
+                                            <div class="form-group">
+                                                {{ form.course.label_tag }}
+                                                {{ form.course }}
+                                            </div>
+                                            <div class="form-group">
+                                                {{ form.dob.label_tag }}
+                                                {{ form.dob }}
+                                            </div>
+                                            <div class="form-group">
+                                                {{ form.email.label_tag }}
+                                                {{ form.email }}
+                                            </div>
+                                            <button type="submit" name="form_submit" class="btn btn-primary btn-block">Add Student</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header" id="csvHeading">
+                                    <h5 class="mb-0">
+                                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#csvSection" aria-expanded="false" aria-controls="csvSection">
+                                            Import CSV
+                                        </button>
+                                    </h5>
+                                </div>
+                                <div id="csvSection" class="collapse" aria-labelledby="csvHeading" data-parent="#accordion">
+                                    <div class="card-body">
+                                        <h1 class="form-header text-center">Upload CSV</h1>
+                                        <form method="post" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            <div class="form-group">
+                                                <label for="csv_file">Upload CSV File:</label>
+                                                <input type="file" name="csv_file" id="csv_file" accept=".csv">
+                                            </div>
+                                            <div class="csv-preview">
+                                                <h4>CSV Preview:</h4>
+                                                <div id="csv_preview"></div>
+                                            </div>
+                                            <button type="submit" name="csv_submit" class="btn btn-primary btn-block">Import CSV</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            function readCSV(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var csvData = e.target.result;
+                        $('#csv_preview').html('<pre>' + csvData + '</pre>');
+                    };
+                    reader.readAsText(input.files[0]);
+                }
+            }
+
+            $('#csv_file').change(function(){
+                readCSV(this);
+            });
+        });
+    </script>
+</body>
+</html>

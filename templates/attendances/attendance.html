@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}Attendance Form{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="text-center">Mark Attendance</h1>
+    
+    <!-- Search Bar -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by Name">
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Scrollable Table -->
+        <div class="scrollable-table">
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Roll Number</th>
+                        <th>Attendance</th>
+                        <th>Remarks (for Absences)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.roll_number }}</td>
+                        <td>
+                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                <label class="btn btn-toggle {% if student.attendance == 'Present' %}active btn-success{% else %}btn-outline-primary{% endif %}">
+                                    <input type="radio" name="student_{{ student.id }}" value="Present" {% if student.attendance == 'Present' %}checked{% endif %}> Present
+                                </label>
+                                <label class="btn btn-toggle {% if student.attendance == 'Absent' %}active btn-danger{% else %}btn-outline-primary{% endif %}">
+                                    <input type="radio" name="student_{{ student.id }}" value="Absent" {% if student.attendance == 'Absent' %}checked{% endif %}> Absent
+                                </label>
+                            </div>
+                        </td>
+                        <td>
+                            <textarea class="form-control" name="remarks_{{ student.id }}" placeholder="Remarks (optional)">{{ student.remarks }}</textarea>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Submit and Cancel Buttons -->
+        <div class="row mt-3">
+            <div class="col text-center">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+            <div class="col text-center">
+                <a href="#" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Include Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<!-- Script for Filtering Table Rows -->
+<script>
+    // Filter table rows based on search input
+    $(document).ready(function() {
+        $('#searchInput').on('keyup', function() {
+            var value = $(this).val().toLowerCase();
+            $('tbody tr').filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+        
+        // Handle toggle button state changes
+        $('.btn-toggle').on('click', function() {
+            var btn = $(this);
+            var value = btn.find('input').val();
+            btn.parent().find('.btn-toggle').removeClass('active btn-success btn-danger').addClass('btn-outline-primary');
+            btn.removeClass('btn-outline-primary').addClass(value === 'Present' ? 'active btn-success' : 'active btn-danger');
+        });
+    });
+</script>
+{% endblock %}

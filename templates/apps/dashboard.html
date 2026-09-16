@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}NCMT AMS{% endblock %}
+
+{% block content %}
+<div class="container dashboard-container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="text-center">NCMT Attendance Management Panel</h1>
+            <p class="text-center welcome-text"><i>Manage your attendance system effectively.</i></p>
+        </div>
+    </div>
+    <div class="row">
+        <!-- Add Program Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-graduation-cap"></i> Add Program</h5>
+                    <p class="card-text">Add new programs to the attendance system.</p>
+                    <a href="{% url 'program_create' %}" class="btn btn-primary">Add Program</a>
+                </div>
+            </div>
+        </div>
+        <!-- Add Student Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-user-plus"></i> Add Student</h5>
+                    <p class="card-text">Add new students to the attendance system.</p>
+                    <a href="{% url 'add-student' %}" class="btn btn-primary">Add Student</a>
+                </div>
+            </div>
+        </div>
+        <!-- List Students Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-list"></i> List Students</h5>
+                    <p class="card-text">View the list of students.</p>
+                    <a href="{% url 'student-list' %}" class="btn btn-primary">List Students</a>
+                </div>
+            </div>
+        </div>
+        <!-- Mark Attendance Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="far fa-calendar-check"></i> Mark Attendance</h5>
+                    <p class="card-text">Mark the attendance of students.</p>
+                    <a href="{% url 'attendance_view' %}" class="btn btn-primary">Mark Attendance</a>
+                </div>
+            </div>
+        </div>
+        <!-- Daily Attendance Report Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="far fa-file-alt"></i> Daily Attendance Report</h5>
+                    <p class="card-text">View the attendance report of students.</p>
+                    <a href="{% url 'attendance_report' %}" class="btn btn-primary">Today's Report</a>
+                </div>
+            </div>
+        </div>
+        <!-- Attendance Report Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="far fa-chart-bar"></i> Attendance Report</h5>
+                    <p class="card-text">View the attendance report of students.</p>
+                    <a href="{% url 'this_months_attendance_report' %}" class="btn btn-primary">Monthly Report</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+<footer class="footer fixed-bottom bg-dark text-light">
+    <div class="container">
+        <p>&copy; 2026 National College of Management and Technical Science. All rights reserved.</p>
+        <p><a href="https://ncmt.edu.np/">Visit our website</a></p>
+    </div>
+</footer>
+{% endblock %}

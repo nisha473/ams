@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Program List{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Program List</h1>
+        <div class="d-flex">
+            <form class="form-inline mr-3" method="GET" action="">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Search by program name" value="{{ request.GET.search }}">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </div>
+            </form>
+            <a href="{% url 'program_create' %}" class="btn btn-primary btn-sm">Add Program</a>
+        </div>
+    </div>
+
+    <table class="table table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Name</th>
+                <th>Credits</th>
+                <th>Quota</th>
+                <th>Fee</th>
+                <th>Level</th>
+                <th>Active</th>
+                <th class="text-right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for program in programs %}
+            <tr>
+                <td>{{ program.name }}</td>
+                <td>{{ program.credits }}</td>
+                <td>{{ program.quota }}</td>
+                <td>{{ program.fee }}</td>
+                <td>{{ program.level }}</td>
+                <td>
+                    {% if program.is_active %}
+                        <span class="badge badge-success">Active</span>
+                    {% else %}
+                        <span class="badge badge-secondary">Inactive</span>
+                    {% endif %}
+                </td>
+                <td class="text-right">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Actions
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a href="{% url 'program_update' program.pk %}" class="dropdown-item">Edit</a>
+                            <a href="{% url 'program_delete' program.pk %}" class="dropdown-item">Delete</a>
+                            <a href="{% url 'program_toggle_active' program.pk %}" class="dropdown-item">
+                                {% if program.is_active %}Disable{% else %}Enable{% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">No programs found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <!-- Pagination -->
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if programs.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ programs.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Previous</a>
+                </li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">{{ programs.number }}</span></li>
+            {% if programs.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ programs.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ programs.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Last</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
+{% endblock %}

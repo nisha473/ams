@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Attendance Management System{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .dashboard-container {
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+        .card {
+            background-color: #f8f9fa;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            height: 100%;
+        }
+        .welcome-text {
+            margin-top: 20px;
+        }
+        .navbar {
+            background-color: #002366;
+        }
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold !important;
+        }
+        .navbar-nav .nav-link {
+            color: white !important;
+            font-weight: bold !important;
+        }
+        .navbar-text {
+            color: white !important;
+            margin-right: 20px;
+            font-weight: bold !important;
+        }
+        .card-title i {
+            margin-right: 10px;
+        }
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+        .btn {
+            width: auto; /* Adjusted width to fit content */
+        }
+        .notification-icon {
+            margin-right: 10px;
+            color: #FFD700 !important; /* Light golden color */
+            cursor: pointer;
+        }
+        .refresh-icon {
+            margin-right: 10px;
+            color: white !important; /* White color */
+            cursor: pointer;
+        }
+        .footer {
+            background-color: #002366;
+            color: #FFD700;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .footer a {
+            color: #FFD700;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <a class="navbar-brand" href="{% url 'home_page' %}">National College of Management and Technical Science</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <i class="fas fa-sync-alt refresh-icon" onclick="location.reload();"></i> <!-- Refresh Icon -->
+                </li>
+                <li class="nav-item">
+                    <i class="fas fa-bell notification-icon"></i> <!-- Notification Icon -->
+                </li>
+                <li class="nav-item">
+                    <span class="navbar-text">
+                        <strong>{{ user.username }}</strong>
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'logout' %}"><strong>Logout</strong></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container dashboard-container">
+        <div class="container">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <!-- Include Font Awesome -->
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <!-- Include Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

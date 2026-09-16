@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Success</title>
+    <style>
+        /* Style for the popup container */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid #ccc;
+            padding: 20px;
+            background-color: #fff;
+            z-index: 1000;
+        }
+        /* Style for the close button */
+        .close {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Popup container -->
+    <div id="popup" class="popup">
+        <span class="close" onclick="closePopup()">&times;</span>
+        <h1>Student has been added successfully.</h1>
+    </div>
+
+    <!-- JavaScript to close the popup after 5 seconds and redirect -->
+    <script>
+        // Function to close the popup and redirect
+        function closePopup() {
+            var popup = document.getElementById('popup');
+            popup.style.display = 'none';
+            // Redirect to the students page
+            window.location.href = '/students/';
+        }
+
+        setTimeout(closePopup, 5000);
+    </script>
+</body>
+</html>

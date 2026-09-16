@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}This Month's Attendance Report{% endblock %}
+
+{% block content %}
+<div class="card mt-4">
+    <div class="card-header">
+        <h1>This Month's Attendance Report</h1>
+    </div>
+    <div class="card-body">
+        <!-- Search form -->
+        <form action="" method="GET" class="mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <input type="text" name="student_name" class="form-control" placeholder="Search by Student Name" value="{{ student_name }}">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="start_date" class="form-control" placeholder="Start Date" value="{{ start_date|default_if_none:'' }}">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="end_date" class="form-control" placeholder="End Date" value="{{ end_date|default_if_none:'' }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Search</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Attendance table -->
+        {% if attendance_counts %}
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Total Attendance Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attendance in attendance_counts %}
+                    <tr>
+                        <td>{{ attendance.student__name }}</td>
+                        <td>{{ attendance.total_attendance }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2">No attendance records found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination controls -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if attendance_counts.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if student_name %}&student_name={{ student_name }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">&laquo; First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ attendance_counts.previous_page_number }}{% if student_name %}&student_name={{ student_name }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">&lsaquo; Previous</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><a class="page-link" href="#">&laquo; First</a></li>
+                <li class="page-item disabled"><a class="page-link" href="#">&lsaquo; Previous</a></li>
+                {% endif %}
+
+                <li class="page-item active"><a class="page-link" href="#">{{ attendance_counts.number }}</a></li>
+
+                {% if attendance_counts.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ attendance_counts.next_page_number }}{% if student_name %}&student_name={{ student_name }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">Next &rsaquo;</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ attendance_counts.paginator.num_pages }}{% if student_name %}&student_name={{ student_name }}{% endif %}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}">Last &raquo;</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><a class="page-link" href="#">Next &rsaquo;</a></li>
+                <li class="page-item disabled"><a class="page-link" href="#">Last &raquo;</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% else %}
+        <div class="alert alert-info" role="alert">
+            No attendance records found for the selected criteria.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

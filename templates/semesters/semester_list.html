@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Semesters for {{ program.name }}{% endblock %}
+{% block content %}
+<h1>Semesters for {{ program.name }}</h1>
+<a href="{% url 'semester_create' program.id %}" class="btn btn-primary">Add New Semester</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Semester Number</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for semester in semesters %}
+        <tr>
+            <td>{{ semester.semester_number }}</td>
+            <td>
+                <a href="{% url 'semester_update' semester.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'semester_delete' semester.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                <a href="{% url 'subject_list' semester.pk %}" class="btn btn-sm btn-info">View Subjects</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
