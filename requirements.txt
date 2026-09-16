@@ -5,3 +5,4 @@ humanize==4.9.0
 python-decouple
 django-cors-headers
 django-filter
+python-decouple

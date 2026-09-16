@@ -4,7 +4,7 @@ createvenv:
 activate:
 	source venv/bin/activate
 
-dependencies:
+dep:
 	pip3 install -r requirements.txt
 
 run:
@@ -19,3 +19,6 @@ migrationsfile:
 
 migration:
 	python3 manage.py migrate
+
+django:
+	pip3 install django
