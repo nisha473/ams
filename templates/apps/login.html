@@ -32,6 +32,10 @@
                                         <button class="btn btn-lg btn-primary">Sign in</button>
                                     </div>
                                 </form>
+                                <p class="text-center mt-3 mb-0">
+                                    New here?
+                                    <a href="{% url 'signup' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">Create an account</a>
+                                </p>
                             </div>
                         </div>
                     </div>

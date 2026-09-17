@@ -4,19 +4,40 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1 class="text-center mb-4">Today's Attendance Report</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Today's Attendance Report</h1>
+        <a class="btn btn-success" href="?download=csv{% if student_name %}&student_name={{ student_name }}{% endif %}{% if course %}&course={{ course }}{% endif %}{% if shift %}&shift={{ shift }}{% endif %}">
+            <i class="fas fa-download"></i> Download CSV
+        </a>
+    </div>
 
     <!-- Search form -->
     <div class="row justify-content-end mb-4">
-        <div class="col-md-6">
-            <form method="get" class="form-inline justify-content-end">
-                <div class="input-group">
-                    <input type="text" name="student_name" class="form-control" placeholder="Search by student name" value="{{ student_name }}">
-                    <div class="input-group-append">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Search
-                        </button>
-                    </div>
+        <div class="col-md-10">
+            <form method="get" class="form-row">
+                <div class="col-md-4 mb-2">
+                    <input type="text" name="student_name" class="form-control" placeholder="Search by student name" value="{{ student_name|default_if_none:'' }}">
+                </div>
+                <div class="col-md-3 mb-2">
+                    <select name="course" class="form-control">
+                        <option value="">All programs</option>
+                        {% for available_course in courses %}
+                            <option value="{{ available_course }}" {% if course == available_course %}selected{% endif %}>{{ available_course }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <select name="shift" class="form-control">
+                        <option value="">All shifts</option>
+                        {% for available_shift in shifts %}
+                            <option value="{{ available_shift }}" {% if shift == available_shift %}selected{% endif %}>{{ available_shift }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-search"></i> Search
+                    </button>
                 </div>
             </form>
         </div>
@@ -30,7 +51,8 @@
                     <tr>
                         <th>Student Name</th>
                         <th>Roll Number</th>
-                        <th>Course</th>
+                        <th>Program</th>
+                        <th>Shift</th>
                         <th>Status</th>
                         <th>Date</th>
                     </tr>
@@ -41,12 +63,13 @@
                         <td>{{ record.student.name }}</td>
                         <td>{{ record.student.roll_number }}</td>
                         <td>{{ record.student.course }}</td>
+                        <td>{{ record.student.shift }}</td>
                         <td>{{ record.status }}</td>
                         <td>{{ record.date }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center">No attendance records found for today.</td>
+                        <td colspan="6" class="text-center">No attendance records found for today.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -61,10 +84,10 @@
                 <ul class="pagination justify-content-center">
                     {% if attendance_data.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page=1{% if student_name %}&student_name={{ student_name }}{% endif %}">&laquo; First</a>
+                            <a class="page-link" href="?page=1{% if student_name %}&student_name={{ student_name }}{% endif %}{% if course %}&course={{ course }}{% endif %}{% if shift %}&shift={{ shift }}{% endif %}">&laquo; First</a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ attendance_data.previous_page_number }}{% if student_name %}&student_name={{ student_name }}{% endif %}">&lsaquo; Previous</a>
+                            <a class="page-link" href="?page={{ attendance_data.previous_page_number }}{% if student_name %}&student_name={{ student_name }}{% endif %}{% if course %}&course={{ course }}{% endif %}{% if shift %}&shift={{ shift }}{% endif %}">&lsaquo; Previous</a>
                         </li>
                     {% else %}
                         <li class="page-item disabled"><a class="page-link" href="#">&laquo; First</a></li>
@@ -75,10 +98,10 @@
 
                     {% if attendance_data.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ attendance_data.next_page_number }}{% if student_name %}&student_name={{ student_name }}{% endif %}">Next &rsaquo;</a>
+                            <a class="page-link" href="?page={{ attendance_data.next_page_number }}{% if student_name %}&student_name={{ student_name }}{% endif %}{% if course %}&course={{ course }}{% endif %}{% if shift %}&shift={{ shift }}{% endif %}">Next &rsaquo;</a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ attendance_data.paginator.num_pages }}{% if student_name %}&student_name={{ student_name }}{% endif %}">Last &raquo;</a>
+                            <a class="page-link" href="?page={{ attendance_data.paginator.num_pages }}{% if student_name %}&student_name={{ student_name }}{% endif %}{% if course %}&course={{ course }}{% endif %}{% if shift %}&shift={{ shift }}{% endif %}">Last &raquo;</a>
                         </li>
                     {% else %}
                         <li class="page-item disabled"><a class="page-link" href="#">Next &rsaquo;</a></li>

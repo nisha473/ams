@@ -1,158 +1,269 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add Student</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .form-container {
-            margin-top: 50px;
-        }
-        .form-header {
-            margin-bottom: 30px;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
-        }
-        form label {
-            margin-bottom: 0.5rem;
-        }
-        form input[type="text"],
-        form input[type="email"],
-        form input[type="date"] {
-            margin-bottom: 1rem;
-        }
-        .csv-preview {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-   <!-- Navigation Bar -->
-   <nav class="navbar navbar-expand-lg navbar-light">
-    <a class="navbar-brand" href="{% url 'home_page' %}">NCMT Attendance Management System</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item">
-                <span class="navbar-text">
-                    <i class="fas fa-bell notification-icon"></i> <!-- Notification Icon -->
-                    <strong>{{ user.username }}</strong> <!-- Display username here -->
-                </span>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'logout' %}"><strong>Logout</strong></a>
-            </li>
-        </ul>
-    </div>
-</nav>
+{% extends 'base.html' %}
 
+{% block title %}Add Student{% endblock %}
 
-    <div class="container form-container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-body">
-                        <div id="accordion">
-                            <div class="card">
-                                <div class="card-header" id="formHeading">
-                                    <h5 class="mb-0">
-                                        <button class="btn btn-link" data-toggle="collapse" data-target="#formSection" aria-expanded="true" aria-controls="formSection">
-                                            Add Student Form
-                                        </button>
-                                    </h5>
-                                </div>
-                                <div id="formSection" class="collapse show" aria-labelledby="formHeading" data-parent="#accordion">
-                                    <div class="card-body">
-                                        <h1 class="form-header text-center">Add Student</h1>
-                                        <form method="post" enctype="multipart/form-data">
-                                            {% csrf_token %}
-                                            <div class="form-group">
-                                                {{ form.name.label_tag }}
-                                                {{ form.name }}
-                                            </div>
-                                            <div class="form-group">
-                                                {{ form.roll_number.label_tag }}
-                                                {{ form.roll_number }}
-                                            </div>
-                                            <div class="form-group">
-                                                {{ form.course.label_tag }}
-                                                {{ form.course }}
-                                            </div>
-                                            <div class="form-group">
-                                                {{ form.dob.label_tag }}
-                                                {{ form.dob }}
-                                            </div>
-                                            <div class="form-group">
-                                                {{ form.email.label_tag }}
-                                                {{ form.email }}
-                                            </div>
-                                            <button type="submit" name="form_submit" class="btn btn-primary btn-block">Add Student</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card">
-                                <div class="card-header" id="csvHeading">
-                                    <h5 class="mb-0">
-                                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#csvSection" aria-expanded="false" aria-controls="csvSection">
-                                            Import CSV
-                                        </button>
-                                    </h5>
-                                </div>
-                                <div id="csvSection" class="collapse" aria-labelledby="csvHeading" data-parent="#accordion">
-                                    <div class="card-body">
-                                        <h1 class="form-header text-center">Upload CSV</h1>
-                                        <form method="post" enctype="multipart/form-data">
-                                            {% csrf_token %}
-                                            <div class="form-group">
-                                                <label for="csv_file">Upload CSV File:</label>
-                                                <input type="file" name="csv_file" id="csv_file" accept=".csv">
-                                            </div>
-                                            <div class="csv-preview">
-                                                <h4>CSV Preview:</h4>
-                                                <div id="csv_preview"></div>
-                                            </div>
-                                            <button type="submit" name="csv_submit" class="btn btn-primary btn-block">Import CSV</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
+{% block content %}
+<style>
+    .student-page {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 0 48px;
+        background: linear-gradient(135deg, #eef5ff 0%, #f8fbff 52%, #fff7e8 100%);
+        border-radius: 14px;
+    }
+
+    .student-modal {
+        width: 100%;
+        max-width: 760px;
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #dce6f2;
+        border-radius: 14px;
+        box-shadow: 0 18px 45px rgba(25, 55, 90, 0.16);
+    }
+
+    .student-modal__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 26px 30px 22px;
+        color: #ffffff;
+        background: #002d62;
+    }
+
+    .student-modal__eyebrow {
+        margin: 0 0 6px;
+        color: #ffd35a;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .student-modal__title {
+        margin: 0;
+        font-size: 1.65rem;
+        font-weight: 700;
+    }
+
+    .student-modal__subtitle {
+        margin: 7px 0 0;
+        color: #d5e5f7;
+        font-size: 0.92rem;
+    }
+
+    .student-modal__close {
+        color: #ffffff;
+        font-size: 1.7rem;
+        line-height: 1;
+        text-decoration: none;
+    }
+
+    .student-modal__close:hover {
+        color: #ffd35a;
+        text-decoration: none;
+    }
+
+    .student-modal__body {
+        padding: 28px 30px 30px;
+    }
+
+    .student-form .form-group {
+        margin-bottom: 18px;
+    }
+
+    .student-form label {
+        margin-bottom: 7px;
+        color: #30445c;
+        font-size: 0.84rem;
+        font-weight: 700;
+    }
+
+    .student-form input,
+    .student-form select {
+        min-height: 44px;
+        border: 1px solid #cbd8e6;
+        border-radius: 7px;
+        box-shadow: none;
+    }
+
+    .student-form input:focus,
+    .student-form select:focus {
+        border-color: #2878c8;
+        box-shadow: 0 0 0 3px rgba(40, 120, 200, 0.12);
+    }
+
+    .student-form .text-danger,
+    .student-form ul.errorlist {
+        margin-top: 5px;
+        color: #b42318;
+        font-size: 0.8rem;
+    }
+
+    .student-form ul.errorlist {
+        padding-left: 18px;
+        margin-bottom: 0;
+    }
+
+    .student-form__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 8px;
+    }
+
+    .student-form__actions .btn {
+        min-width: 120px;
+        min-height: 42px;
+        border-radius: 7px;
+        font-weight: 700;
+    }
+
+    .csv-import {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #e3eaf2;
+    }
+
+    .csv-import summary {
+        color: #245887;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .csv-import__content {
+        padding-top: 18px;
+    }
+
+    .csv-preview {
+        max-height: 180px;
+        overflow: auto;
+        margin: 14px 0;
+        padding: 12px;
+        border: 1px solid #dce6f2;
+        border-radius: 7px;
+        background: #f7faff;
+    }
+
+    @media (max-width: 576px) {
+        .student-page {
+            padding: 0;
+            background: transparent;
+        }
+
+        .student-modal__header,
+        .student-modal__body {
+            padding: 22px 18px;
+        }
+
+        .student-form__actions {
+            flex-direction: column-reverse;
+        }
+
+        .student-form__actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="student-page">
+    <section class="student-modal" aria-labelledby="add-student-title">
+        <header class="student-modal__header">
+            <div>
+                <p class="student-modal__eyebrow">Student records</p>
+                <h1 id="add-student-title" class="student-modal__title">Add a student</h1>
+                <p class="student-modal__subtitle">Create a profile for attendance and academic records.</p>
+            </div>
+            <a class="student-modal__close" href="{% url 'home_page' %}" aria-label="Close">&times;</a>
+        </header>
+
+        <div class="student-modal__body">
+            <form method="post" class="student-form">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.name.label_tag }}
+                            {{ form.name }}
+                            {{ form.name.errors }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.roll_number.label_tag }}
+                            {{ form.roll_number }}
+                            {{ form.roll_number.errors }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.course.label_tag }}
+                            {{ form.course }}
+                            {{ form.course.errors }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.shift.label_tag }}
+                            {{ form.shift }}
+                            {{ form.shift.errors }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.dob.label_tag }}
+                            {{ form.dob }}
+                            {{ form.dob.errors }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form.email.label_tag }}
+                            {{ form.email }}
+                            {{ form.email.errors }}
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="student-form__actions">
+                    <a href="{% url 'home_page' %}" class="btn btn-light">Cancel</a>
+                    <button type="submit" name="form_submit" class="btn btn-primary">Save student</button>
+                </div>
+            </form>
+
+            <details class="csv-import">
+                <summary>Import students from CSV</summary>
+                <div class="csv-import__content">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <label for="csv_file">Choose a CSV file</label>
+                        <input type="file" name="csv_file" id="csv_file" accept=".csv" class="form-control-file">
+                        <div class="csv-preview" id="csv_preview" hidden></div>
+                        <button type="submit" name="csv_submit" class="btn btn-outline-primary">Import CSV</button>
+                    </form>
+                </div>
+            </details>
         </div>
-    </div>
+    </section>
+</div>
 
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script>
-        $(document).ready(function(){
-            function readCSV(input) {
-                if (input.files && input.files[0]) {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        var csvData = e.target.result;
-                        $('#csv_preview').html('<pre>' + csvData + '</pre>');
-                    };
-                    reader.readAsText(input.files[0]);
-                }
-            }
-
-            $('#csv_file').change(function(){
-                readCSV(this);
-            });
-        });
-    </script>
-</body>
-</html>
+<script>
+    document.getElementById('csv_file').addEventListener('change', function () {
+        const preview = document.getElementById('csv_preview');
+        const file = this.files[0];
+        if (!file) {
+            preview.hidden = true;
+            preview.textContent = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            preview.hidden = false;
+            preview.textContent = event.target.result;
+        };
+        reader.readAsText(file);
+    });
+</script>
+{% endblock %}

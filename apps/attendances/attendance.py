@@ -1,4 +1,7 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+import csv
 from django.contrib.auth import authenticate, login, logout
 from apps.models import *
 from datetime import datetime
@@ -9,10 +12,22 @@ from django.db.models.functions import TruncDate
 from datetime import datetime, date, timedelta
 
 
+@login_required(login_url='/login/')
 def AttendanceView(request):
     today = date.today()
-    if Attendance.objects.filter(date=today).exists():
-        return redirect('attendance_report')
+    course = request.GET.get('course')
+    shift = request.GET.get('shift')
+    students = Student.objects.all()
+    if course:
+        students = students.filter(course__iexact=course)
+    if shift:
+        students = students.filter(shift__iexact=shift)
+
+    if students.exists() and not students.exclude(attendance__date=today).exists():
+        report_url = '/attendance/report/'
+        if course or shift:
+            report_url += f'?course={course or ""}&shift={shift or ""}'
+        return redirect(report_url)
 
     if request.method == 'POST':
         for student_id, status in request.POST.items():
@@ -21,21 +36,50 @@ def AttendanceView(request):
                 student = Student.objects.get(pk=student_id)
                 if not Attendance.objects.filter(student=student, date=today).exists():
                     Attendance.objects.create(student=student, date=today, status=status)
-        return redirect('attendance/success')
-    students = Student.objects.all()
-    return render(request, 'attendances/attendance.html', {'students': students})
+        return redirect('attendance_success')
+    return render(request, 'attendances/attendance.html', {
+        'students': students,
+        'course': course,
+        'shift': shift,
+        'courses': Student.objects.values_list('course', flat=True).distinct().order_by('course'),
+        'shifts': ['Morning', 'Evening'],
+    })
 
+@login_required(login_url='/login/')
 def AttendanceSuccess(request):
     return render(request, 'attendances/attendance_success.html')
 
+@login_required(login_url='/login/')
 def AttendanceReportView(request):
     today_date = datetime.now().date()
+    import csv
     attendance_records = Attendance.objects.filter(date=today_date).order_by('student')
     student_name = request.GET.get('student_name')
+    course = request.GET.get('course')
+    shift = request.GET.get('shift')
 
     if student_name:
         attendance_records = attendance_records.filter(student__name__icontains=student_name)
+    if course:
+        attendance_records = attendance_records.filter(student__course=course)
+    if shift:
+        attendance_records = attendance_records.filter(student__shift__iexact=shift)
 
+    if request.GET.get('download') == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="attendance-report-{today_date}.csv"'
+        writer = csv.writer(response)
+        writer.writerow(['Student Name', 'Roll Number', 'Program', 'Shift', 'Status', 'Date'])
+        for record in attendance_records.select_related('student'):
+            writer.writerow([
+                record.student.name,
+                record.student.roll_number,
+                record.student.course,
+                record.student.shift,
+                record.status,
+                record.date,
+            ])
+        return response
     paginator = Paginator(attendance_records, 10)
     page_number = request.GET.get('page')
     try:
@@ -50,7 +94,11 @@ def AttendanceReportView(request):
 
     return render(request, 'attendances/attendance_report.html', {
         'attendance_data': attendance_data,
-        'student_name': student_name
+        'student_name': student_name,
+        'course': course,
+        'shift': shift,
+        'courses': Student.objects.values_list('course', flat=True).distinct().order_by('course'),
+        'shifts': ['Morning', 'Evening'],
     })
 
 
@@ -84,6 +132,15 @@ def this_months_attendance_report(request):
             end_date = None
 
     attendance_counts = attendance_records.values('student__name').annotate(total_attendance=Count('id')).order_by('student__name')
+
+    if request.GET.get('download') == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="attendance-monitoring-report-{today}.csv"'
+        writer = csv.writer(response)
+        writer.writerow(['Student Name', 'Total Attendance Count'])
+        for attendance in attendance_counts:
+            writer.writerow([attendance['student__name'], attendance['total_attendance']])
+        return response
 
     paginator = Paginator(attendance_counts, 10)
     page_number = request.GET.get('page')

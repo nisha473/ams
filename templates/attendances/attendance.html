@@ -4,6 +4,30 @@
 <div class="container">
     <h1 class="text-center">Mark Attendance</h1>
     
+    <form method="get" class="form-row mb-3">
+        <div class="col-md-4 mb-2">
+            <label for="course">Program</label>
+            <select id="course" name="course" class="form-control">
+                <option value="">All programs</option>
+                {% for available_course in courses %}
+                    <option value="{{ available_course }}" {% if course == available_course %}selected{% endif %}>{{ available_course }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4 mb-2">
+            <label for="shift">Shift</label>
+            <select id="shift" name="shift" class="form-control">
+                <option value="">All shifts</option>
+                {% for available_shift in shifts %}
+                    <option value="{{ available_shift }}" {% if shift|lower == available_shift|lower %}selected{% endif %}>{{ available_shift }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2 mb-2 align-self-end">
+            <button type="submit" class="btn btn-outline-primary btn-block">Load students</button>
+        </div>
+    </form>
+
     <!-- Search Bar -->
     <div class="row mb-3">
         <div class="col-md-6">
@@ -11,7 +35,7 @@
         </div>
     </div>
 
-    <form method="post">
+    <form method="post" action="?course={{ course }}&shift={{ shift }}">
         {% csrf_token %}
         
         <!-- Scrollable Table -->
@@ -21,6 +45,8 @@
                     <tr>
                         <th>Name</th>
                         <th>Roll Number</th>
+                        <th>Program</th>
+                        <th>Shift</th>
                         <th>Attendance</th>
                         <th>Remarks (for Absences)</th>
                     </tr>
@@ -30,6 +56,8 @@
                     <tr>
                         <td>{{ student.name }}</td>
                         <td>{{ student.roll_number }}</td>
+                        <td>{{ student.course }}</td>
+                        <td>{{ student.shift }}</td>
                         <td>
                             <div class="btn-group btn-group-toggle" data-toggle="buttons">
                                 <label class="btn btn-toggle {% if student.attendance == 'Present' %}active btn-success{% else %}btn-outline-primary{% endif %}">

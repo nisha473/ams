@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView
 from decouple import config
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect
@@ -10,12 +10,17 @@ from datetime import datetime
 from .student_forms import StudentForm
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from datetime import date
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.views import LoginView, LogoutView
+from django.utils.http import url_has_allowed_host_and_scheme
+from datetime import date
 import csv
 from django.core.paginator import Paginator
 from django.db.models import Count, F
+from django.db.models import Q
 from django.db.models.functions import TruncDate
+from .signup_forms import SignupForm
 
 
 def dashboard_view(request):
@@ -85,6 +90,41 @@ class LoginView(TemplateView):
             )
         return HttpResponseRedirect(f"/login/?next={next}")
 
+
+def signup_view(request):
+    next_url = request.GET.get('next', request.POST.get('next', '/home/'))
+    if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        next_url = '/home/'
+
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect(next_url)
+    else:
+        form = SignupForm()
+    return render(request, 'apps/signup.html', {'form': form, 'next': next_url})
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('home_page')
+
+
+@login_required(login_url='/login/')
+def change_password_view(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Your password has been changed successfully.')
+            return redirect('home_page')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'apps/change_password.html', {'form': form})
+
 def add_student_view(request):
     form = StudentForm()  # Ensure form is always initialized
     if request.method == 'POST':
@@ -106,7 +146,10 @@ def handle_uploaded_csv(csv_file):
     for row in reader:
         name, roll_number, course, dob, email = row
         # Check if a student with the same roll number and course already exists
-        if not Student.objects.filter(roll_number=roll_number, course=course).exists():
+        if not Student.objects.filter(
+            roll_number__iexact=roll_number.strip(),
+            course__iexact=course.strip(),
+        ).exists():
             Student.objects.create(
                 name=name,
                 roll_number=roll_number,
@@ -118,17 +161,48 @@ def handle_uploaded_csv(csv_file):
 def add_student_success(request):
     return render(request, 'students/student_success.html')
 
+def edit_student_view(request, pk):
+    student = get_object_or_404(Student, pk=pk)
+    if request.method == 'POST':
+        form = StudentForm(request.POST, instance=student)
+        if form.is_valid():
+            form.save()
+            return redirect('student-list')
+    else:
+        form = StudentForm(instance=student)
+    return render(request, 'students/edit_student.html', {'form': form, 'student': student})
+
 def student_list_view(request):
     if request.method == 'POST':
         course = request.POST.get('course')
         shift = request.POST.get('shift')
-        students = Student.objects.filter(course=course)
-        paginator = Paginator(students, 10)
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-        return render(request, 'students/students.html', {'page_obj': page_obj, 'course': course, 'shift': shift})
+        search = ''
     else:
-        return render(request, 'students/student_form.html')
+        course = request.GET.get('course')
+        shift = request.GET.get('shift')
+        search = request.GET.get('search', '').strip()
+
+    students = Student.objects.all()
+    if course:
+        students = students.filter(course__iexact=course)
+    if shift:
+        students = students.filter(shift__iexact=shift)
+    if search:
+        students = students.filter(
+            Q(name__icontains=search) | Q(roll_number__icontains=search)
+        )
+    students = students.order_by('name')
+    paginator = Paginator(students, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'students/students.html', {
+        'page_obj': page_obj,
+        'course': course,
+        'shift': shift,
+        'search': search,
+        'courses': Student.objects.values_list('course', flat=True).distinct().order_by('course'),
+        'shifts': ['Morning', 'Evening'],
+    })
     
 def csv_preview(request):
     if request.method == 'POST' and request.FILES.get('csv_file'):

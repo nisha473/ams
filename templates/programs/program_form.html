@@ -1,10 +1,264 @@
 {% extends 'base.html' %}
 {% block title %}{{ form.instance.pk|yesno:"Edit Program,Add Program" }}{% endblock %}
 {% block content %}
-<h1>{{ form.instance.pk|yesno:"Edit Program,Add Program" }}</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Save</button>
-</form>
+<style>
+    .program-page {
+        min-height: 70vh;
+        padding: 24px 0 48px;
+        background: linear-gradient(135deg, #eef5ff 0%, #f8fbff 56%, #fff8e8 100%);
+        border-radius: 14px;
+    }
+
+    .program-panel {
+        max-width: 850px;
+        margin: 0 auto;
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #dce6f2;
+        border-radius: 14px;
+        box-shadow: 0 18px 45px rgba(25, 55, 90, 0.14);
+    }
+
+    .program-panel__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 28px 32px 24px;
+        color: #ffffff;
+        background: #002d62;
+    }
+
+    .program-panel__eyebrow {
+        margin: 0 0 6px;
+        color: #ffd35a;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .program-panel__title {
+        margin: 0;
+        font-size: 1.65rem;
+        font-weight: 700;
+    }
+
+    .program-panel__subtitle {
+        margin: 7px 0 0;
+        color: #d5e5f7;
+        font-size: 0.92rem;
+    }
+
+    .program-panel__close {
+        color: #ffffff;
+        font-size: 1.7rem;
+        line-height: 1;
+        text-decoration: none;
+    }
+
+    .program-panel__close:hover {
+        color: #ffd35a;
+        text-decoration: none;
+    }
+
+    .program-panel__body {
+        padding: 30px 32px 32px;
+    }
+
+    .program-section {
+        margin-bottom: 26px;
+    }
+
+    .program-section__title {
+        margin-bottom: 4px;
+        color: #1f3b59;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    .program-section__hint {
+        margin-bottom: 18px;
+        color: #718096;
+        font-size: 0.84rem;
+    }
+
+    .program-form .form-group {
+        margin-bottom: 18px;
+    }
+
+    .program-form label {
+        margin-bottom: 7px;
+        color: #30445c;
+        font-size: 0.84rem;
+        font-weight: 700;
+    }
+
+    .program-form input:not([type="checkbox"]),
+    .program-form select {
+        min-height: 44px;
+        border: 1px solid #cbd8e6;
+        border-radius: 7px;
+        box-shadow: none;
+    }
+
+    .program-form input:focus,
+    .program-form select:focus {
+        border-color: #2878c8;
+        box-shadow: 0 0 0 3px rgba(40, 120, 200, 0.12);
+    }
+
+    .program-form .form-check {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+        padding: 11px 14px;
+        border: 1px solid #dce6f2;
+        border-radius: 7px;
+        background: #f7faff;
+    }
+
+    .program-form .form-check input {
+        margin: 0 9px 0 0;
+    }
+
+    .program-form .form-check label {
+        margin: 0;
+    }
+
+    .program-form .text-danger,
+    .program-form ul.errorlist {
+        margin-top: 5px;
+        color: #b42318;
+        font-size: 0.8rem;
+    }
+
+    .program-form ul.errorlist {
+        padding-left: 18px;
+        margin-bottom: 0;
+    }
+
+    .program-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 8px;
+        border-top: 1px solid #e3eaf2;
+    }
+
+    .program-actions .btn {
+        min-width: 120px;
+        min-height: 42px;
+        border-radius: 7px;
+        font-weight: 700;
+    }
+
+    @media (max-width: 576px) {
+        .program-page {
+            padding: 0;
+            background: transparent;
+        }
+
+        .program-panel__header,
+        .program-panel__body {
+            padding: 22px 18px;
+        }
+
+        .program-actions {
+            flex-direction: column-reverse;
+        }
+
+        .program-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="program-page">
+    <section class="program-panel" aria-labelledby="program-form-title">
+        <header class="program-panel__header">
+            <div>
+                <p class="program-panel__eyebrow">Academic catalogue</p>
+                <h1 id="program-form-title" class="program-panel__title">{{ form.instance.pk|yesno:"Edit program,Create a program" }}</h1>
+                <p class="program-panel__subtitle">Set the details students and administrators will use.</p>
+            </div>
+            <a class="program-panel__close" href="{% url 'program_list' %}" aria-label="Close">&times;</a>
+        </header>
+
+        <div class="program-panel__body">
+            <form method="post" class="program-form">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                <section class="program-section">
+                    <h2 class="program-section__title">Program details</h2>
+                    <p class="program-section__hint">Give the program a recognizable name and academic level.</p>
+                    <div class="form-row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                {{ form.name.label_tag }}
+                                {{ form.name }}
+                                {{ form.name.errors }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.level.label_tag }}
+                                {{ form.level }}
+                                {{ form.level.errors }}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="program-section">
+                    <h2 class="program-section__title">Capacity and fees</h2>
+                    <p class="program-section__hint">Use whole numbers for capacity and credits; enter the fee in the program currency.</p>
+                    <div class="form-row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.credits.label_tag }}
+                                {{ form.credits }}
+                                {{ form.credits.errors }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.quota.label_tag }}
+                                {{ form.quota }}
+                                {{ form.quota.errors }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.fee.label_tag }}
+                                {{ form.fee }}
+                                {{ form.fee.errors }}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="program-section">
+                    <h2 class="program-section__title">Program status</h2>
+                    <p class="program-section__hint">Annual programs can be managed differently from semester-based programs.</p>
+                    <div class="form-check">
+                        {{ form.is_annual }}
+                        {{ form.is_annual.label_tag }}
+                    </div>
+                    {{ form.is_annual.errors }}
+                    <div class="form-check mt-2">
+                        {{ form.is_active }}
+                        {{ form.is_active.label_tag }}
+                    </div>
+                    {{ form.is_active.errors }}
+                </section>
+
+                <div class="program-actions">
+                    <a href="{% url 'program_list' %}" class="btn btn-light">Cancel</a>
+                    <button type="submit" class="btn btn-primary">{{ form.instance.pk|yesno:"Save changes,Create program" }}</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
 {% endblock %}
